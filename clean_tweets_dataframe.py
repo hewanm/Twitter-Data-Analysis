@@ -30,9 +30,9 @@ class Clean_Tweets:
         """
         convert column to datetime
         """
-        #df['created_at'] = pd.to_datatime()
+        df['created_at'] = pd.to_datatime(df['created_at'])
         
-        ----
+        return df
         
         df = df[df['created_at'] >= '2020-12-31' ]
         
