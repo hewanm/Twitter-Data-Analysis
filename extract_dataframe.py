@@ -1,6 +1,7 @@
+import re
 import json
 import pandas as pd
-from textblob import TextBlob
+from textblob import TextBlob, sentiments
 
 def read_json(json_file: str)->list:
     """
@@ -35,60 +36,113 @@ class TweetDfExtractor:
 
     # an example function
     def find_statuses_count(self)->list:
-        statuses_count 
+        statuses_count = [x["user"]["statuses_count"] for x in self.tweets_list]
+        return statuses_count
         
     def find_full_text(self)->list:
-        text = 
+        text = []
+        for x in self.tweets_list:
+            try:
+                text = x["retweeted_status"]["extended_tweet"]["full_text"]
+            except KeyError:
+                text = x["text"]
+            texts.append(text)
+        return texts
        
     
     def find_sentiments(self, text)->list:
+        def text_category(p):
+            """
+            converts polarity into sentiment category
+            """
+            if p > 0:
+                return "positive"
+            elif p < 0:
+                return "negative"
+            else:
+                return "neutral"
+
+        polarity = [TextBlob(x).polarity for x in text]
+        subjectivity = [TextBlob(x).subjectivity for x in text]
+        sentiment = [text_category(x) for x in polarity]
         
         return polarity, self.subjectivity
 
     def find_created_time(self)->list:
-       
+        created_at = [x["created_at"] for x in self.tweets_list]
         return created_at
 
     def find_source(self)->list:
-        source = 
+        source = [x["source"] for x in self.tweets_list]
 
         return source
 
     def find_screen_name(self)->list:
-        screen_name = 
+        screen_name = [x["user"]["screen_name"] for x in self.tweets_list]
 
     def find_followers_count(self)->list:
-        followers_count = 
+        followers_count = [x["user"]["followers_count"] for x in self.tweets_list]
+        return followers_count
 
     def find_friends_count(self)->list:
-        friends_count = 
+        friends_count = [x["user"]["friends_count"] for x in self.tweets_list]
+        return friends_count
 
     def is_sensitive(self)->list:
-        try:
-            is_sensitive = [x['possibly_sensitive'] for x in self.tweets_list]
-        except KeyError:
-            is_sensitive = None
+        is_sensitive = []
+        for x in self.tweets_list:
+            try:
+                is_sensitive = [x['possibly_sensitive'] for x in self.tweets_list]
+                except KeyError:
+                    is_sensitive = None
 
         return is_sensitive
 
     def find_favourite_count(self)->list:
-        
+        favourite_count = []
+        for x in self.tweets_list:
+            try:
+                value = x["retweeted_status"]["favorite_count"]
+            except KeyError:
+                value = x["favorite_count"]
+            favourite_count.append(value)
+        return favourite_count
     
     def find_retweet_count(self)->list:
-        retweet_count = 
+        retweet_count = []
+        for x in self.tweets_list:
+            try:
+                value = x["retweeted_status"]["retweet_count"]
+            except KeyError:
+                value = x["retweet_count"]
+            retweet_count.append(value)
+        return retweet_count
 
     def find_hashtags(self)->list:
-        hashtags =
+        hashtags = []
+        for text in self.find_clean_text():
+            value = " ".join(re.findall("(#[A-Za-z]+[A-Za-z0-9_-]+)", str(text).lower()))
+            if value == "":
+                value = " "
+            hashtags.append(value)
+        return hashtags
 
     def find_mentions(self)->list:
-        mentions = 
-
+        mentions = []
+        for text in self.find_clean_text():
+            value = " ".join(re.findall("(@[A-Za-z0-9_]+)", str(text).lower()))
+            if value == "":
+                value = " "
+            mentions.append(value)
+        return mentions
 
     def find_location(self)->list:
-        try:
-            location = self.tweets_list['user']['location']
-        except TypeError:
-            location = ''
+        location = []
+        for x in self.tweets_list:
+            try:
+                location = self.tweets_list['user']['location']
+                except TypeError:
+                    location = ''
         
         return location
 
